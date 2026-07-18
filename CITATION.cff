@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use this benchmark, cite this version and its canonical publication."
+message: "Cite benchmark version 1.0.0 and its canonical publication. Repository tag v1.0.1 is only a licence-metadata packaging patch with byte-identical research assets."
 title: "Same-match EPL Football Prediction Model Benchmark: Elo, LightGBM, Poisson and Dixon-Coles"
 type: dataset
 authors:

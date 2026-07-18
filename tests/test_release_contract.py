@@ -115,6 +115,8 @@ class ReleaseContractTest(unittest.TestCase):
         )
         self.assertIn(canonical, readme[:900])
         self.assertIn(canonical, citation)
+        self.assertIn('version: "1.0.0"', citation)
+        self.assertIn("v1.0.1 is only a licence-metadata packaging patch", citation)
         self.assertNotIn("doi:", citation.lower())
         self.assertEqual(zenodo["version"], "1.0.0")
 
