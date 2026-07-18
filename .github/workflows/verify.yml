@@ -36,5 +36,97 @@ jobs:
           cache: pip
       - name: Install the exact v1 runtime
         run: python -m pip install --requirement requirements.txt
-      - name: Rebuild from ten SHA-pinned publisher files and compare exact bytes
-        run: python scripts/generate-epl-football-prediction-model-benchmark.py --rebuild
+      - name: Rebuild from ten SHA-pinned publisher files for aggregate-only diagnosis
+        run: python scripts/generate-epl-football-prediction-model-benchmark.py --write
+      - name: Report safe aggregate byte and numeric drift
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import csv
+          import hashlib
+          import io
+          import json
+          from pathlib import Path
+          import subprocess
+
+          files = (
+              "data/epl-football-prediction-model-benchmark-1.0.0.json",
+              "data/epl-football-prediction-model-benchmark-1.0.0.csv",
+              "data/epl-football-prediction-model-benchmark-1.0.0-manifest.json",
+          )
+
+          def frozen(path: str) -> bytes:
+              return subprocess.check_output(["git", "show", f"HEAD:{path}"])
+
+          def sha(value: bytes) -> str:
+              return hashlib.sha256(value).hexdigest()
+
+          for path in files:
+              old = frozen(path)
+              new = Path(path).read_bytes()
+              print(json.dumps({
+                  "path": path,
+                  "frozenSha256": sha(old),
+                  "rebuiltSha256": sha(new),
+                  "frozenBytes": len(old),
+                  "rebuiltBytes": len(new),
+                  "byteIdentical": old == new,
+              }, sort_keys=True))
+
+          numeric = []
+
+          def compare(old, new, path="$"):
+              if isinstance(old, dict) and isinstance(new, dict):
+                  for key in sorted(set(old) | set(new)):
+                      compare(old.get(key), new.get(key), f"{path}.{key}")
+              elif isinstance(old, list) and isinstance(new, list):
+                  for index, (left, right) in enumerate(zip(old, new, strict=False)):
+                      compare(left, right, f"{path}[{index}]")
+              elif old != new and isinstance(old, (int, float)) and isinstance(new, (int, float)):
+                  numeric.append((abs(float(new) - float(old)), path, old, new))
+
+          json_path = files[0]
+          compare(json.loads(frozen(json_path)), json.loads(Path(json_path).read_bytes()))
+          print(json.dumps({
+              "jsonNumericFieldsChanged": len(numeric),
+              "largestNumericChanges": [
+                  {"path": path, "frozen": old, "rebuilt": new, "absoluteDelta": delta}
+                  for delta, path, old, new in sorted(numeric, reverse=True)[:40]
+              ],
+          }, sort_keys=True))
+
+          csv_path = files[1]
+          old_rows = list(csv.DictReader(io.StringIO(frozen(csv_path).decode())))
+          new_rows = list(csv.DictReader(io.StringIO(Path(csv_path).read_text())))
+          cell_changes = []
+          for old, new in zip(old_rows, new_rows, strict=True):
+              identity = {key: old.get(key) for key in ("recordType", "modelId", "season", "metric")}
+              for field in old:
+                  if old[field] == new[field] or old[field] == "" or new[field] == "":
+                      continue
+                  try:
+                      left, right = float(old[field]), float(new[field])
+                  except ValueError:
+                      continue
+                  cell_changes.append((abs(right - left), identity, field, old[field], new[field]))
+          print(json.dumps({
+              "csvNumericCellsChanged": len(cell_changes),
+              "largestCsvNumericChanges": [
+                  {**identity, "field": field, "frozen": old, "rebuilt": new, "absoluteDelta": delta}
+                  for delta, identity, field, old, new in sorted(cell_changes, reverse=True)[:40]
+              ],
+          }, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-aggregate-rebuild-diagnostic
+          path: |
+            data/epl-football-prediction-model-benchmark-1.0.0.json
+            data/epl-football-prediction-model-benchmark-1.0.0.csv
+            data/epl-football-prediction-model-benchmark-1.0.0-manifest.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Keep exact-byte contract visibly fail-closed
+        run: git diff --exit-code -- data/epl-football-prediction-model-benchmark-1.0.0.json data/epl-football-prediction-model-benchmark-1.0.0.csv data/epl-football-prediction-model-benchmark-1.0.0-manifest.json
