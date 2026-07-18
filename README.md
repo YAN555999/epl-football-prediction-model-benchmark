@@ -94,6 +94,14 @@ compares all three generated outputs byte-for-byte with v1. No downloaded raw
 row is cached or committed. Alternatively, `--source-dir` accepts user-held
 `<season>/E0.csv` inputs after applying the same source hash checks.
 
+Public CI keeps frozen-byte integrity and regeneration as separate gates. It
+first verifies every committed release hash without network access, then runs
+two consecutive full Linux x64 rebuilds in one locked job; both must reproduce
+the JSON, CSV and manifest byte-for-byte. A matching macOS arm64 rebuild was
+also recorded before the v1 tag. Exact replay is tested on those declared
+environments, not promised for every operating system, CPU or math runtime.
+See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) for the pre-release audit trail.
+
 If an upstream correction changes a byte, the source pin fails closed. Version
 1.0.0 is never rewritten; a reviewed correction requires a new version, new
 hashes and a new release.
