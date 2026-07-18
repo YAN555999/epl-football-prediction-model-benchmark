@@ -1,0 +1,39 @@
+{
+  "title": "Same-match EPL Football Prediction Model Benchmark: Elo, LightGBM, Poisson and Dixon-Coles",
+  "description": "Aggregate comparison of ten English Premier League 1X2 prediction systems on the same 1,520 fixtures across four full evaluation seasons, with expanding-origin training, explicit information-time boundaries and no raw match, odds or fixture-level prediction rows redistributed.",
+  "creators": [
+    {
+      "name": "Football Proof AI"
+    }
+  ],
+  "license": "cc-by-4.0",
+  "upload_type": "dataset",
+  "access_right": "open",
+  "publication_date": "2026-07-18",
+  "version": "1.0.0",
+  "keywords": [
+    "football prediction",
+    "English Premier League",
+    "probabilistic forecasting",
+    "Brier score",
+    "probability calibration",
+    "Elo rating",
+    "logistic regression",
+    "LightGBM",
+    "Poisson model",
+    "Dixon-Coles",
+    "reproducible benchmark"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://footballproofai.com/research/epl-football-prediction-model-benchmark",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    },
+    {
+      "identifier": "https://github.com/YAN555999/epl-football-prediction-model-benchmark/releases/tag/v1.0.0",
+      "relation": "isVersionOf",
+      "scheme": "url"
+    }
+  ]
+}
