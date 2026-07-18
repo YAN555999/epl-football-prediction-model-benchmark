@@ -9,7 +9,8 @@ same-match English Premier League 1X2 model benchmark. Ten systems were scored
 on the identical 1,520 completed fixtures across four full evaluation seasons,
 with complete earlier seasons used for expanding-origin training.
 
-- Immutable release: <https://github.com/YAN555999/epl-football-prediction-model-benchmark/releases/tag/v1.0.0>
+- Immutable research release: <https://github.com/YAN555999/epl-football-prediction-model-benchmark/releases/tag/v1.0.0>
+- License-metadata packaging patch: <https://github.com/YAN555999/epl-football-prediction-model-benchmark/releases/tag/v1.0.1> (the benchmark remains version 1.0.0 and every research asset is byte-identical)
 - Evaluation: 1,520 EPL matches, 2022/23 through 2025/26
 - Prior history: six complete EPL seasons, 2016/17 through 2021/22
 - Models: uniform and expanding-prior baselines; Elo-logit; 14-feature logistic regression; ridge-Poisson; sequential Dixon-Coles; raw and isotonic-calibrated LightGBM

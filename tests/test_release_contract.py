@@ -108,6 +108,7 @@ class ReleaseContractTest(unittest.TestCase):
     def test_discovery_and_citation_metadata_keep_the_canonical_boundary(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         citation = (ROOT / "CITATION.cff").read_text(encoding="utf-8")
+        zenodo = json.loads((ROOT / ".zenodo.json").read_text(encoding="utf-8"))
         canonical = (
             "https://footballproofai.com/research/"
             "epl-football-prediction-model-benchmark"
@@ -115,6 +116,30 @@ class ReleaseContractTest(unittest.TestCase):
         self.assertIn(canonical, readme[:900])
         self.assertIn(canonical, citation)
         self.assertNotIn("doi:", citation.lower())
+        self.assertEqual(zenodo["version"], "1.0.0")
+
+    def test_license_metadata_is_complete_and_has_no_template_placeholders(self) -> None:
+        mit = (ROOT / "LICENSES/MIT.txt").read_text(encoding="utf-8")
+        self.assertIn("Copyright (c) 2026 Football Proof AI", mit)
+        inspected = (
+            "README.md",
+            "NOTICE.md",
+            "LICENSE",
+            "LICENSES/CC-BY-4.0.txt",
+            "LICENSES/MIT.txt",
+            "CITATION.cff",
+            ".zenodo.json",
+        )
+        placeholders = (
+            "<year>",
+            "<copyright holders>",
+            "PLACEHOLDER",
+            "CHANGEME",
+        )
+        for relative_path in inspected:
+            text = (ROOT / relative_path).read_text(encoding="utf-8")
+            for placeholder in placeholders:
+                self.assertNotIn(placeholder, text, relative_path)
 
 
 if __name__ == "__main__":
